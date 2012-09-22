@@ -166,8 +166,7 @@ func (h *Hash) update(b []byte) {
 		b = b[64:]
 	}
 	// Save leftovers.
-	copy(h.x[h.nx:], b)
-	h.nx += len(b)
+	h.nx += copy(h.x[h.nx:], b)
 }
 
 // Write adds more data to the running hash.
@@ -257,8 +256,7 @@ func (r *outputReader) Read(p []byte) (n int, err error) {
 	left := BlockSize - r.nx
 
 	if len(p) < left {
-		copy(p, r.x[r.nx:r.nx+len(p)])
-		r.nx += len(p)
+		r.nx += copy(p, r.x[r.nx:r.nx+len(p)])
 		return
 	}
 
@@ -272,8 +270,7 @@ func (r *outputReader) Read(p []byte) (n int, err error) {
 		r.nextBlock()
 	}
 	if len(p) > 0 {
-		copy(p, r.x[:len(p)])
-		r.nx += len(p)
+		r.nx += copy(p, r.x[:len(p)])
 	}
 	return
 }
