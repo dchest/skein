@@ -22,7 +22,6 @@ type Hash struct {
 	nx int      // number of bytes in buffer
 
 	outLen uint64 // output length in bytes
-	hasMsg bool   // true if message block argument has been used
 
 	ik [8]uint64 // copy of initial chain value
 }
@@ -173,7 +172,6 @@ func (h *Hash) update(b []byte) {
 // It never returns an error.
 func (h *Hash) Write(b []byte) (n int, err error) {
 	h.update(b)
-	h.hasMsg = true
 	return len(b), nil
 }
 
@@ -184,10 +182,8 @@ func (h0 *Hash) Sum(in []byte) []byte {
 	h := new(Hash)
 	*h = *h0
 
-	if h.hasMsg {
-		// Finalize message.
-		h.hashLastBlock()
-	}
+	// Finalize message.
+	h.hashLastBlock()
 
 	return h.appendOutput(in, h.outLen)
 }
@@ -208,7 +204,6 @@ func (h *Hash) Reset() {
 	h.k = h.ik
 	// Reset buffer.
 	h.nx = 0
-	h.hasMsg = false
 	// Init tweak to first message block.
 	h.t[0] = 0
 	h.t[1] = messageArg<<56 | firstBlockFlag
@@ -233,10 +228,10 @@ type outputReader struct {
 func newOutputReader(h *Hash) *outputReader {
 	// Initialize with the copy of h.
 	r := &outputReader{Hash: *h}
-	if r.hasMsg {
-		// Finalize message.
-		r.hashLastBlock()
-	}
+
+	// Finalize message.
+	r.hashLastBlock()
+
 	// Set buffer position to end.
 	r.nx = BlockSize
 	return r
