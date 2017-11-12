@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
+	"io"
 	"testing"
 )
 
@@ -181,6 +182,20 @@ func TestNew(t *testing.T) {
 	for i, v := range testVectors {
 		h := New(v.outLen, v.args)
 		h.Write(v.input)
+		sum := fmt.Sprintf("%x", h.Sum(nil))
+		if sum != v.hexResult {
+			t.Errorf("%d: expected %s, got %s", i, v.hexResult, sum)
+		}
+	}
+}
+
+func TestCopyIo(t *testing.T) {
+	for i, v := range testVectors {
+		h := New(v.outLen, v.args)
+		r := bytes.NewReader(v.input)
+		if _, err := io.Copy(h, r); err != nil {
+			t.Error(err)
+		}
 		sum := fmt.Sprintf("%x", h.Sum(nil))
 		if sum != v.hexResult {
 			t.Errorf("%d: expected %s, got %s", i, v.hexResult, sum)
