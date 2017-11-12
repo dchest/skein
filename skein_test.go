@@ -231,6 +231,19 @@ func xorInPortions(key, nonce, b []byte) {
 
 }
 
+func TestStreamKnown(t *testing.T) {
+	key := []byte("key")
+	nonce := []byte("nonce")
+	in := make([]byte, 10)
+	known := fromHex("ed036a52bbb40f471c77")
+
+	c := NewStream(key, nonce)
+	c.XORKeyStream(in, in)
+	if !bytes.Equal(in, known) {
+		t.Errorf("expected: %x, got %x", known, in)
+	}
+}
+
 func TestNewStream(t *testing.T) {
 	key := []byte("key")
 	nonce := []byte("nonce")
